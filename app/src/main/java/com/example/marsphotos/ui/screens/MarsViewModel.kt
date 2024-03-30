@@ -15,16 +15,30 @@
  */
 package com.example.marsphotos.ui.screens
 
+import android.net.http.HttpException
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-
+import androidx.lifecycle.viewModelScope
+import com.example.marsphotos.network.MarsApi
+import kotlinx.coroutines.launch
+import java.io.IOException
+import java.util.Calendar
+sealed interface MarsUiState {
+    data class Success(val photos: String) : MarsUiState
+    object Error : MarsUiState
+    object Loading : MarsUiState
+}
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 class MarsViewModel : ViewModel() {
     /** The mutable State that stores the status of the most recent request */
-    var marsUiState: String by mutableStateOf("")
+    var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Loading)
         private set
 
+    var selectedDate: Calendar = Calendar.getInstance()
     /**
      * Call getMarsPhotos() on init so we can display status immediately.
      */
@@ -36,7 +50,32 @@ class MarsViewModel : ViewModel() {
      * Gets Mars photos information from the Mars API Retrofit service and updates the
      * [MarsPhoto] [List] [MutableList].
      */
+    fun updateSelectedDate(calendar: Calendar) {
+        selectedDate = calendar
+    }
+    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun getMarsPhotos() {
-        marsUiState = "Set the Mars API status response here!"
+        viewModelScope.launch{
+            val location="New Delhi"
+//            val startDateTime = "2019-06-13T00:00:00" // Example startDateTime
+//            val endDateTime = "2019-06-13T23:59:59"
+            marsUiState=MarsUiState.Loading
+            marsUiState = try {
+                val listResult = MarsApi.retrofitService.getPhotos()
+//                val listResult = MarsApi.retrofitService.getPhotos(location, "2019-06-13T00:00:00", "2019-06-13T23:59:59")
+                MarsUiState.Success("Success: Mars Photos retrieved")
+//                MarsUiState.Success("Success: ${listResult.size} Mars Photos retrieved")
+
+            } catch (e: IOException){
+                MarsUiState.Error
+            }
+            catch (e:HttpException) {
+                MarsUiState.Error
+            }
+            catch (e:NullPointerException){
+                MarsUiState.Error
+            }
+        }
+
     }
 }
