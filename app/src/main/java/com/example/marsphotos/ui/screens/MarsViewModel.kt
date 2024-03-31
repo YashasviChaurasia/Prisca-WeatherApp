@@ -90,7 +90,7 @@ class MarsViewModel : ViewModel() {
         catch (e: IOException) {
                 marsUiState = MarsUiState.Error
         } catch (e: HttpException) {
-            Log.d("http exception,brooooooo", "getMarsPhotos: ${e.message})")
+            Log.d("httpe", "getMarsPhotos: ${e.message})")
             marsUiState = MarsUiState.Error
         } catch (e: NullPointerException) {
 
