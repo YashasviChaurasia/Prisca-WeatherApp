@@ -24,21 +24,24 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.marsphotos.network.MarsApi
+import com.example.marsphotos.network.MarsPhoto
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.Calendar
-sealed interface MarsUiState {
-    data class Success(val photos: String) : MarsUiState
-    object Error : MarsUiState
-    object Loading : MarsUiState
-}
+//sealed interface MarsUiState {
+//    data class Success(val photos: String) : MarsUiState
+//    object Error : MarsUiState
+//    object Loading : MarsUiState
+//}
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 class MarsViewModel : ViewModel() {
     /** The mutable State that stores the status of the most recent request */
-    var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Loading)
-        private set
+//    var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Loading)
+//        private set
 
     var selectedDate: Calendar = Calendar.getInstance()
+    var plocation: String by mutableStateOf("New York")
+    var listResult: MarsPhoto? by mutableStateOf(null)
     /**
      * Call getMarsPhotos() on init so we can display status immediately.
      */
@@ -53,30 +56,31 @@ class MarsViewModel : ViewModel() {
     fun updateSelectedDate(calendar: Calendar) {
         selectedDate = calendar
     }
+    fun updatelocation(loc:String) {
+        plocation = loc
+    }
+    fun getlocation():String {
+        return plocation
+    }
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun getMarsPhotos() {
-        viewModelScope.launch{
-            val location="NewDelhi"
-//            val startDateTime = "2019-06-13T00:00:00" // Example startDateTime
-//            val endDateTime = "2019-06-13T23:59:59"
-            marsUiState=MarsUiState.Loading
-            marsUiState = try {
-//                val listResult = MarsApi.retrofitService.getPhotos()
-                val listResult = MarsApi.retrofitService.getPhotos(location, "2019-06-13T00:00:00", "2019-06-13T23:59:59")
-                MarsUiState.Success("Success: Mars Photos ${listResult.locations} retrieved")
+//        if (plocation.isEmpty() || marsUiState is MarsUiState.Success) return
+        try {
+            viewModelScope.launch {
 
-//                MarsUiState.Success("Success: ${listResult.size} Mars Photos retrieved")
+                var location = plocation // Use the location set in the ViewModel
+                val startDate = "2019-06-13T00:00:00"
+                val endDate = "2019-06-13T23:59:59"
+                listResult = MarsApi.retrofitService.getPhotos(location, startDate, endDate)
 
-            } catch (e: IOException){
-                MarsUiState.Error
-            }
-            catch (e:HttpException) {
-                MarsUiState.Error
-            }
-            catch (e:NullPointerException){
-                MarsUiState.Error
             }
         }
-
+        catch (e: IOException) {
+//                marsUiState = MarsUiState.Error
+        } catch (e: HttpException) {
+//                marsUiState = MarsUiState.Error
+        } catch (e: NullPointerException) {
+//                marsUiState = MarsUiState.Error
+        }
     }
 }
