@@ -56,14 +56,15 @@ class MarsViewModel : ViewModel() {
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun getMarsPhotos() {
         viewModelScope.launch{
-            val location="New Delhi"
+            val location="NewDelhi"
 //            val startDateTime = "2019-06-13T00:00:00" // Example startDateTime
 //            val endDateTime = "2019-06-13T23:59:59"
             marsUiState=MarsUiState.Loading
             marsUiState = try {
-                val listResult = MarsApi.retrofitService.getPhotos()
-//                val listResult = MarsApi.retrofitService.getPhotos(location, "2019-06-13T00:00:00", "2019-06-13T23:59:59")
-                MarsUiState.Success("Success: Mars Photos retrieved")
+//                val listResult = MarsApi.retrofitService.getPhotos()
+                val listResult = MarsApi.retrofitService.getPhotos(location, "2019-06-13T00:00:00", "2019-06-13T23:59:59")
+                MarsUiState.Success("Success: Mars Photos ${listResult.locations} retrieved")
+
 //                MarsUiState.Success("Success: ${listResult.size} Mars Photos retrieved")
 
             } catch (e: IOException){
