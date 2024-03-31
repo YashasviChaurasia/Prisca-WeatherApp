@@ -30,7 +30,7 @@ interface MarsApiService {
     suspend fun getPhotos(
         @Query("location") location: String,
         @Query("startDateTime") startDateTime: String,
-        @Query("endDateTime") endDateTime: String,
+//        @Query("endDateTime") endDateTime: String,
         @Query("aggregateHours") aggregateHours: Int = 24,
         @Query("unitGroup") unitGroup: String = "uk",
         @Query("contentType") contentType: String = "json",

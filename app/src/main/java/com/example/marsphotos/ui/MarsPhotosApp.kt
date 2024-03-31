@@ -33,6 +33,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.marsphotos.R
 import com.example.marsphotos.ui.screens.HomeScreen
@@ -66,7 +69,7 @@ fun MarsTopAppBar(scrollBehavior: TopAppBarScrollBehavior, modifier: Modifier = 
         scrollBehavior = scrollBehavior,
         title = {
             Text(
-                text = stringResource(id = R.string.app_name), style = MaterialTheme.typography.displaySmall
+                text = "prīsca", style = MaterialTheme.typography.displaySmall, fontStyle = FontStyle.Italic, fontWeight = FontWeight.SemiBold,
             )
         },
         modifier = modifier

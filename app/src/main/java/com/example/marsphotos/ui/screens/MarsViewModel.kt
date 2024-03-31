@@ -17,6 +17,7 @@ package com.example.marsphotos.ui.screens
 
 import android.net.http.HttpException
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,19 +28,25 @@ import com.example.marsphotos.network.MarsApi
 import com.example.marsphotos.network.MarsPhoto
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.text.SimpleDateFormat
 import java.util.Calendar
-//sealed interface MarsUiState {
-//    data class Success(val photos: String) : MarsUiState
-//    object Error : MarsUiState
-//    object Loading : MarsUiState
-//}
+import java.util.Locale
+
+sealed interface MarsUiState {
+    data class Success(val photos: String) : MarsUiState
+    object Error : MarsUiState
+    object Loading : MarsUiState
+}
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 class MarsViewModel : ViewModel() {
     /** The mutable State that stores the status of the most recent request */
-//    var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Loading)
-//        private set
+    var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Success(""))
+        private set
 
-    var selectedDate: Calendar = Calendar.getInstance()
+    var selectedDate: Calendar by mutableStateOf(Calendar.getInstance().apply {
+        // Set the selected date to a past time (e.g., one year ago)
+        add(Calendar.YEAR, -1)
+    })
     var plocation: String by mutableStateOf("New York")
     var listResult: MarsPhoto? by mutableStateOf(null)
     /**
@@ -48,6 +55,7 @@ class MarsViewModel : ViewModel() {
     init {
         getMarsPhotos()
     }
+
 
     /**
      * Gets Mars photos information from the Mars API Retrofit service and updates the
@@ -69,18 +77,28 @@ class MarsViewModel : ViewModel() {
             viewModelScope.launch {
 
                 var location = plocation // Use the location set in the ViewModel
-                val startDate = "2019-06-13T00:00:00"
-                val endDate = "2019-06-13T23:59:59"
-                listResult = MarsApi.retrofitService.getPhotos(location, startDate, endDate)
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+                val startDate = dateFormat.format(selectedDate.time).toString()
+//                val startDate = "2019-06-13T00:00:00"
+//                Log.d("MarsViewModel", "getMarsPhotos: $sDate")
+//                val endDate = "2019-06-13T23:59:59"
+                listResult = MarsApi.retrofitService.getPhotos(location, startDate)//, endDate)
+
 
             }
         }
         catch (e: IOException) {
-//                marsUiState = MarsUiState.Error
+                marsUiState = MarsUiState.Error
         } catch (e: HttpException) {
-//                marsUiState = MarsUiState.Error
+            Log.d("http exception,brooooooo", "getMarsPhotos: ${e.message})")
+            marsUiState = MarsUiState.Error
         } catch (e: NullPointerException) {
-//                marsUiState = MarsUiState.Error
+
+                marsUiState = MarsUiState.Error
+        }
+        catch (e: Exception) {
+            Log.e("MarsViewModel", "getMarsPhotos: ${e.message}")
+            marsUiState = MarsUiState.Error
         }
     }
 }
