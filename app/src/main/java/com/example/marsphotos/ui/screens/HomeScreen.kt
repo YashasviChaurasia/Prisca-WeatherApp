@@ -167,9 +167,13 @@ fun ItemEntryBody(viewModel: MarsViewModel,
                         }
                         // If future date is selected, store the current date instead
                         if (selectedCalendar > currentDate) {
-                            selectedDate.value = currentDate.clone() as Calendar
-                            viewModel.updateSelectedDate(currentDate)
+                            selectedDate.value = selectedCalendar
+                            viewModel.updateSelectedDate(selectedCalendar)
+                            viewModel.pastyear=1
+//                            selectedDate.value = currentDate.clone() as Calendar
+//                            viewModel.updateSelectedDate(currentDate)
                         } else {
+                            viewModel.pastyear=0
                             selectedDate.value = selectedCalendar
                             viewModel.updateSelectedDate(selectedCalendar)
                         }
@@ -186,30 +190,41 @@ fun ItemEntryBody(viewModel: MarsViewModel,
                 leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = "Date Icon") },
                 readOnly = true // Make the text field read-only
             )
-            Text(text = "Selected Date: ${selectedDate.value.time}")
+//            Text(text = "Selected Date: ${selectedDate.value.time}")
         }
-
-
+        val coroutineScope = rememberCoroutineScope()
         Button(
             onClick = {
-                viewModel.getMarsPhotos()
-                val itemDetails = viewModel.packup()
-                if (itemDetails != null) {
-                    // Call saveItem with the prepared itemDetails
+                if(viewModel.pastyear==0){
+                    viewModel.getMarsPhotos()
+                    val itemDetails = viewModel.packup()
+                    if (itemDetails != null) {
+                        // Call saveItem with the prepared itemDetails
+                        viewModel.updateUiState(itemDetails)
+                    }
+                    onSaveClick()
+                }else{
+//                    TODO()
+//    ItemEntryBody(viewModel = viewModel, onSaveClick = {
+                    coroutineScope.launch {
+                        viewModel.getAverageMarsPhotos()
+                    }
+
+                    val itemDetails = viewModel.packup2()
                     viewModel.updateUiState(itemDetails)
+//                    onSaveClick()// just later
                 }
-                onSaveClick()
                 flag=1
             } ,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text("Get Mars Photos")
         }
-
+        Text(text = "Past   : ${viewModel.pastyear}")
         if(flag==1){
             when(viewModel.marsUiState) {
                 MarsUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxWidth())
-                MarsUiState.Error -> ErrorScreen(modifier = modifier.fillMaxWidth())
+                MarsUiState.Error -> ErrorScreen(viewModel,modifier = modifier.fillMaxWidth())
                 is MarsUiState.Success -> ResultScreen(vmodel =viewModel, modifier = modifier.fillMaxWidth())
                 else -> {}
             }
@@ -231,8 +246,9 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
     )
 }
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun ErrorScreen(modifier: Modifier = Modifier) {
+fun ErrorScreen(viewModel: MarsViewModel, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
@@ -242,6 +258,11 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
             painter = painterResource(id = R.drawable.ic_broken_image), contentDescription = ""
         )
         Text(text = stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
+        Text(text = viewModel.ef.toString(), modifier = Modifier.padding(16.dp))
+//        val itemDetails = viewModel.getStuff()
+        // Check if itemDetails is not null before accessing its properties
+
+        if(viewModel.ef==4){ Text(text = "City:") }
     }
 }
 /**
@@ -285,6 +306,9 @@ fun ResultScreen(vmodel: MarsViewModel, modifier: Modifier = Modifier) {
                 }}°C",
                 style = TextStyle(fontSize = 20.sp), // Increase font size for Min Temp
             )
+//            Text(text = "maxTemp: ${vmodel.maximumt},minTemp: ${vmodel.minimumt}")
+
+
 //            if(eflag == 1) {
 //                Text("Error: Unable to retrieve temperature data")
 //                ErrorScreen()

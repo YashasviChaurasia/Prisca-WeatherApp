@@ -18,6 +18,10 @@ import com.example.marsphotos.network.MarsPhoto
 interface MarsPhotosRepository {
     suspend fun getMarsPhotos(location: String, startDate: String): MarsPhoto
     suspend fun insertItem(item: Item)
+
+
+
+    fun getItem(city: String, date: String)
 }
 
 class NetworkMarsPhotosRepository(
@@ -28,6 +32,10 @@ class NetworkMarsPhotosRepository(
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     override suspend fun getMarsPhotos(location: String, startDate: String): MarsPhoto = marsApiService.getPhotos(location, startDate)
     override suspend fun insertItem(item: Item) = itemDao.insert(item)
+
+    override fun getItem(city: String, date: String) {
+        itemDao.getItem(city, date)
+    }
 
 }
 

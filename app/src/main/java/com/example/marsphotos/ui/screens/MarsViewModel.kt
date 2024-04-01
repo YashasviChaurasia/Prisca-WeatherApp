@@ -34,6 +34,7 @@ import com.example.marsphotos.data.Item
 import com.example.marsphotos.data.ItemsRepository
 import com.example.marsphotos.data.MarsPhotosRepository
 import com.example.marsphotos.network.MarsPhoto
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -67,15 +68,69 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
             city.isNotBlank() && date.isNotBlank()
         }
     }
+    suspend fun getAverageMarsPhotos() {
+        // Get the current year
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+
+        // Store the initial selected date
+        val initialDate = selectedDate.clone() as Calendar
+
+        // Initialize variables to store total mint and maxt
+        var totalMinT = 0.0
+        var totalMaxT = 0.0
+
+        // Iterate over the past 10 years, keeping day and month the same
+        for (i in 1..10) {
+            // Update the selected date to the initial date with year changed
+            selectedDate = initialDate.clone() as Calendar
+            selectedDate.set(Calendar.YEAR, currentYear - i)
+
+            // Make API call to get Mars photos
+            getMarsPhotos()
+            delay(50)
+            // If listResult is not null and contains valid data
+            listResult?.let { marsPhoto ->
+                marsPhoto.locations[plocation]?.values?.firstOrNull()?.let { values ->
+                    // Add the mint and maxt to total
+                    totalMinT += values.mint
+                    totalMaxT += values.maxt
+                }
+            }
+        }
+
+        // Calculate the average mint and maxt
+        val averageMinT = totalMinT / 10
+        val averageMaxT = totalMaxT / 10
+
+        // Update mutable state variables
+        minimumt = averageMinT
+        maximumt = averageMaxT
+        delay(5000)
+        saveItem()
+    }
 
 
+    fun packup2(): ItemDetails {
+
+        return ItemDetails(
+            city = plocation,
+            date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate.time),
+            maxt = maximumt.toString(),
+            mint = minimumt.toString()
+        )
+    }
     fun packup(): ItemDetails? {
         val (maxTemp, minTemp) = try {
             listResult?.locations?.get(getlocation())?.values?.firstOrNull()?.let { it.maxt to it.mint }
         } catch (e: Exception) {
             null to null
         } ?: return null
-
+        if (maxTemp != null) {
+            maximumt= maxTemp
+        }
+        if (minTemp != null) {
+            minimumt= minTemp
+        }
         return ItemDetails(
             city = plocation,
             date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate.time),
@@ -91,11 +146,18 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
         }
     }
 
+    fun getStuff() {
+        return marsPhotosRepository.getItem(plocation, SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate.time))
+    }
 
 
 
 
 
+    var pastyear:Int by mutableStateOf(0)
+    var ef:Int by mutableStateOf(0)
+    var maximumt:Double by mutableStateOf(0.0)
+    var minimumt:Double by mutableStateOf(0.0)
     var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Success(""))
         private set
 
@@ -133,6 +195,7 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
 //        if (plocation.isEmpty() || marsUiState is MarsUiState.Success) return
 
         viewModelScope.launch {
+            ef=0
             marsUiState = MarsUiState.Loading
             var location = plocation // Use the location set in the ViewModel
             val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
@@ -148,15 +211,17 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
                 MarsUiState.Success("Success")
             }
             catch (e: IOException) {
+                ef=4//Internet connection,
                 MarsUiState.Error
             } catch (e: HttpException) {
-                 MarsUiState.Error
+                ef=1
+                MarsUiState.Error
             } catch (e: NullPointerException) {
-
+                ef=2
                 MarsUiState.Error
             }
             catch (e: Exception) {
-                Log.e("MarsViewModel", "getMarsPhotos: ${e.message}")
+                ef=3//wrong location //future date//mostly this error
                 MarsUiState.Error
             }
 
