@@ -5,16 +5,30 @@ import androidx.annotation.RequiresExtension
 import com.example.marsphotos.network.MarsApiService
 import com.example.marsphotos.network.MarsPhoto
 
+//interface ItemsRepository {
+//    suspend fun insertItem(item: Item)
+////    suspend fun deleteItem(item: Item)
+////
+////    /**
+////     * Update item in the data source
+////     */
+////    suspend fun updateItem(item: Item)
+//}
+
 interface MarsPhotosRepository {
     suspend fun getMarsPhotos(location: String, startDate: String): MarsPhoto
+    suspend fun insertItem(item: Item)
 }
 
 class NetworkMarsPhotosRepository(
-    private val marsApiService: MarsApiService
+    private val marsApiService: MarsApiService,
+    private val itemDao: ItemDao
 ) : MarsPhotosRepository {
 
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     override suspend fun getMarsPhotos(location: String, startDate: String): MarsPhoto = marsApiService.getPhotos(location, startDate)
+    override suspend fun insertItem(item: Item) = itemDao.insert(item)
+
 }
 
 //class NetworkMarsPhotosRepository(private val marsApiService: MarsApiService) : MarsPhotosRepository {

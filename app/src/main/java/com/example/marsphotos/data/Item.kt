@@ -15,6 +15,6 @@ data class Item(
     val id: Int = 0,
     val city: String,
     val date: String,
-    val mint: Number,
-    val maxt: Number
+    val mint: Double,
+    val maxt: Double
 )

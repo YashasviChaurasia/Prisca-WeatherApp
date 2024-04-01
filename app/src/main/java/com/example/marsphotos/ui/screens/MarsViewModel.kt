@@ -30,6 +30,8 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.marsphotos.MarsPhotosApplication
+import com.example.marsphotos.data.Item
+import com.example.marsphotos.data.ItemsRepository
 import com.example.marsphotos.data.MarsPhotosRepository
 import com.example.marsphotos.network.MarsPhoto
 import kotlinx.coroutines.launch
@@ -46,6 +48,37 @@ sealed interface MarsUiState {
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : ViewModel() {
     /** The mutable State that stores the status of the most recent request */
+
+
+    var itemUiState by mutableStateOf(ItemUiState())
+        private set
+
+    /**
+     * Updates the [itemUiState] with the value provided in the argument. This method also triggers
+     * a validation for input values.
+     */
+    fun updateUiState(itemDetails: ItemDetails) {
+        itemUiState =
+            ItemUiState(itemDetails = itemDetails, isEntryValid = validateInput(itemDetails))
+    }
+
+    private fun validateInput(uiState: ItemDetails = itemUiState.itemDetails): Boolean {
+        return with(uiState) {
+            city.isNotBlank() && date.isNotBlank()
+        }
+    }
+    suspend fun saveItem() {
+        if (validateInput()) {
+            marsPhotosRepository.insertItem(itemUiState.itemDetails.toItem())
+
+        }
+    }
+
+
+
+
+
+
     var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Success(""))
         private set
 
@@ -76,6 +109,8 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
     fun getlocation():String {
         return plocation
     }
+
+
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun getMarsPhotos() {
 //        if (plocation.isEmpty() || marsUiState is MarsUiState.Success) return
@@ -127,6 +162,54 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
     }
 }
 
+data class ItemUiState(
+    val itemDetails: ItemDetails = ItemDetails(),
+    val isEntryValid: Boolean = false
+)
+
+data class ItemDetails(
+    val id: Int = 0,
+    val city: String = "",
+    val date: String = "",
+    val maxt: String = "",
+    val mint: String = ""
+)
+
+/**
+ * Extension function to convert [ItemDetails] to [Item]. If the value of [ItemDetails.price] is
+ * not a valid [Double], then the price will be set to 0.0. Similarly if the value of
+ * [ItemDetails.quantity] is not a valid [Int], then the quantity will be set to 0
+ */
+fun ItemDetails.toItem(): Item = Item(
+    id = id,
+    city = city,
+    date = date,
+    maxt = maxt.toDoubleOrNull() ?: 0.0,
+    mint = mint.toDoubleOrNull() ?: 0.0
+)
+
+//fun Item.formatedPrice(): String {
+//    return NumberFormat.getCurrencyInstance().format(price)
+//}
+
+/**
+ * Extension function to convert [Item] to [ItemUiState]
+ */
+fun Item.toItemUiState(isEntryValid: Boolean = false): ItemUiState = ItemUiState(
+    itemDetails = this.toItemDetails(),
+    isEntryValid = isEntryValid
+)
+
+/**
+ * Extension function to convert [Item] to [ItemDetails]
+ */
+fun Item.toItemDetails(): ItemDetails = ItemDetails(
+    id = id,
+    city = city,
+    date = date,
+    maxt = maxt.toString(),
+    mint = mint.toString()
+)
 
 //fun CreationExtras.inventoryApplication(): MarsPhotosApplication =
 //    (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MarsPhotosApplication)
