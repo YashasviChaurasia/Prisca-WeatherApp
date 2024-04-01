@@ -67,6 +67,23 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
             city.isNotBlank() && date.isNotBlank()
         }
     }
+
+
+    fun packup(): ItemDetails? {
+        val (maxTemp, minTemp) = try {
+            listResult?.locations?.get(getlocation())?.values?.firstOrNull()?.let { it.maxt to it.mint }
+        } catch (e: Exception) {
+            null to null
+        } ?: return null
+
+        return ItemDetails(
+            city = plocation,
+            date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate.time),
+            maxt = maxTemp.toString(),
+            mint = minTemp.toString()
+        )
+    }
+
     suspend fun saveItem() {
         if (validateInput()) {
             marsPhotosRepository.insertItem(itemUiState.itemDetails.toItem())
@@ -169,8 +186,8 @@ data class ItemUiState(
 
 data class ItemDetails(
     val id: Int = 0,
-    val city: String = "",
-    val date: String = "",
+    var city: String = "",
+    var date: String = "",
     val maxt: String = "",
     val mint: String = ""
 )

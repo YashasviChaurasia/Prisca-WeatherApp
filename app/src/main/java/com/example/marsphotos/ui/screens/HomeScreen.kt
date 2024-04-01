@@ -54,12 +54,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.sp
-
+import kotlinx.coroutines.launch
 
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
@@ -70,17 +71,20 @@ fun HomeScreen(
 //    marsUiState: MarsUiState,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-) {
-    ItemEntryBody(viewModel = viewModel, onSaveClick = { /*TODO*/ })
-
+) { val coroutineScope = rememberCoroutineScope()
+    ItemEntryBody(viewModel = viewModel, onSaveClick = {
+        coroutineScope.launch {
+            viewModel.saveItem()
+        }
+    }, onItemValueChange = viewModel::updateUiState, itemUiState = viewModel.itemUiState)
 }
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun ItemEntryBody(viewModel: MarsViewModel,
     onSaveClick: () -> Unit,
+    itemUiState: ItemUiState,
+    onItemValueChange: (ItemDetails) -> Unit,
     modifier: Modifier = Modifier
 ) {
 //    val ivModel : ItemEntryViewModel = viewModel(factory = MarsViewModel.Factory)
@@ -189,8 +193,14 @@ fun ItemEntryBody(viewModel: MarsViewModel,
         Button(
             onClick = {
                 viewModel.getMarsPhotos()
+                val itemDetails = viewModel.packup()
+                if (itemDetails != null) {
+                    // Call saveItem with the prepared itemDetails
+                    viewModel.updateUiState(itemDetails)
+                }
+                onSaveClick()
                 flag=1
-            },
+            } ,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text("Get Mars Photos")
