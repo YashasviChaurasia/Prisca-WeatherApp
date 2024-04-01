@@ -26,12 +26,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.marsphotos.MarsPhotosApplication
 import com.example.marsphotos.data.MarsPhotosRepository
-import com.example.marsphotos.data.NetworkMarsPhotosRepository
-//import com.example.marsphotos.network.MarsApi
 import com.example.marsphotos.network.MarsPhoto
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -80,36 +79,37 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun getMarsPhotos() {
 //        if (plocation.isEmpty() || marsUiState is MarsUiState.Success) return
-        try {
-            viewModelScope.launch {
 
-                var location = plocation // Use the location set in the ViewModel
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                val startDate = dateFormat.format(selectedDate.time).toString()
+        viewModelScope.launch {
+            marsUiState = MarsUiState.Loading
+            var location = plocation // Use the location set in the ViewModel
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            val startDate = dateFormat.format(selectedDate.time).toString()
 
 //                val startDate = "2019-06-13T00:00:00"
 //                Log.d("MarsViewModel", "getMarsPhotos: $sDate")
 //                val endDate = "2019-06-13T23:59:59"
-                //repository is given to viewmodel
+            //repository is given to viewmodel
 //                listResult = MarsApi.retrofitService.getPhotos(location, startDate)//, endDate)
+            marsUiState = try {
                 listResult = marsPhotosRepository.getMarsPhotos(location, startDate)
-
-
+                MarsUiState.Success("Success")
             }
-        }
-        catch (e: IOException) {
-                marsUiState = MarsUiState.Error
-        } catch (e: HttpException) {
-            Log.d("httpe", "getMarsPhotos: ${e.message})")
-            marsUiState = MarsUiState.Error
-        } catch (e: NullPointerException) {
+            catch (e: IOException) {
+                MarsUiState.Error
+            } catch (e: HttpException) {
+                 MarsUiState.Error
+            } catch (e: NullPointerException) {
 
-                marsUiState = MarsUiState.Error
+                MarsUiState.Error
+            }
+            catch (e: Exception) {
+                Log.e("MarsViewModel", "getMarsPhotos: ${e.message}")
+                MarsUiState.Error
+            }
+
         }
-        catch (e: Exception) {
-            Log.e("MarsViewModel", "getMarsPhotos: ${e.message}")
-            marsUiState = MarsUiState.Error
-        }
+
     }
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
@@ -118,6 +118,15 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
                 val marsPhotosRepository = application.container.marsPhotosRepository
                 MarsViewModel(marsPhotosRepository = marsPhotosRepository)
             }
+//            initializer {
+////                ItemEntryViewModel(inventoryApplication().container.itemsRepository)
+//                val application = (this[APPLICATION_KEY] as MarsPhotosApplication)
+//                ItemEntryViewModel(inventoryApplication().container.itemsRepository)
+//            }
         }
     }
 }
+
+
+//fun CreationExtras.inventoryApplication(): MarsPhotosApplication =
+//    (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MarsPhotosApplication)

@@ -2,12 +2,8 @@ package com.example.marsphotos.data
 
 import android.os.Build
 import androidx.annotation.RequiresExtension
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.marsphotos.network.MarsApiService
 import com.example.marsphotos.network.MarsPhoto
-import com.example.marsphotos.ui.screens.MarsViewModel
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 interface MarsPhotosRepository {
     suspend fun getMarsPhotos(location: String, startDate: String): MarsPhoto

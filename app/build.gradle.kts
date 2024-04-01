@@ -1,3 +1,5 @@
+
+
 /*
 * Copyright (C) 2023 The Android Open Source Project
 *
@@ -13,11 +15,13 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+//@file:Suppress("UnstableApiUsage")
 
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
+    id("com.google.devtools.ksp") version "1.8.21-1.0.11"
 }
 
 android {
@@ -64,6 +68,7 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
 }
 
 dependencies {
@@ -85,12 +90,15 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
-    debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("com.google.android.material:material:1.11.0")
+
+    //Room
+
+    //noinspection GradleDependency
+
+    implementation("androidx.room:room-runtime:2.6.1") // or latest version
+    implementation("androidx.room:room-ktx:2.6.1") // or latest version
+//    ksp("androidx.room:room-compiler:2.5.2") // or latest version
+
 }
+

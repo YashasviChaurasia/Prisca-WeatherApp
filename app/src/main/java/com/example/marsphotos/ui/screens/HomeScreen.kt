@@ -42,6 +42,7 @@ import com.example.marsphotos.R
 import com.example.marsphotos.ui.theme.MarsPhotosTheme
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
@@ -63,25 +64,24 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.layout.HorizontalAlignmentLine
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.sp
-import com.example.marsphotos.network.MarsPhoto
-import java.text.SimpleDateFormat
-import java.util.Locale
+import androidx.lifecycle.viewmodel.compose.viewModel
+
+
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @SuppressLint("RememberReturnType")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: MarsViewModel,
@@ -89,6 +89,20 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
+    ItemEntryBody(viewModel = viewModel, onSaveClick = { /*TODO*/ })
+
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+@Composable
+fun ItemEntryBody(viewModel: MarsViewModel,
+    onSaveClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+//    val ivModel : ItemEntryViewModel = viewModel(factory = MarsViewModel.Factory)
+//    val viModel: ItemEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
@@ -100,6 +114,7 @@ fun HomeScreen(
         var flag by remember {
             mutableIntStateOf(0)
         }
+
         TextField(
             value = text,
             onValueChange = { value ->
@@ -212,8 +227,8 @@ fun HomeScreen(
 
 
     }
-
 }
+
 
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {

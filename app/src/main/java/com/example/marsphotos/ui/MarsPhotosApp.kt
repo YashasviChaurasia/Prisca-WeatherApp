@@ -57,7 +57,8 @@ fun MarsPhotosApp() {
             HomeScreen(
 //                marsUiState = marsViewModel.marsUiState,
                 contentPadding = it,
-                viewModel = marsViewModel
+                viewModel = marsViewModel,
+//                itemEntryViewModel = viewModel(factory = MarsViewModel.Factory)
             )
         }
     }
