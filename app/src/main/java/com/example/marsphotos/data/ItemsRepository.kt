@@ -1,9 +1,11 @@
 package com.example.marsphotos.data
 
+import kotlinx.coroutines.flow.Flow
+
 interface ItemsRepository {
     suspend fun insertItem(item: Item)
 
-    fun getItem(city: String, date: String)
+    fun getItemStream(city: String, date: String): Flow<List<Item>>
 //    suspend fun deleteItem(item: Item)
 //
 //    /**

@@ -20,6 +20,8 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -35,6 +37,11 @@ import com.example.marsphotos.data.ItemsRepository
 import com.example.marsphotos.data.MarsPhotosRepository
 import com.example.marsphotos.network.MarsPhoto
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -46,6 +53,7 @@ sealed interface MarsUiState {
     object Error : MarsUiState
     object Loading : MarsUiState
 }
+data class HomeUiState(val itemList: List<Item> = listOf())
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : ViewModel() {
     /** The mutable State that stores the status of the most recent request */
@@ -146,18 +154,24 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
         }
     }
 
+
+
+
+
     fun getStuff() {
-        return marsPhotosRepository.getItem(plocation, SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate.time))
+//        return marsPhotosRepository.getItem(plocation, SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate.time))
+
+
     }
 
 
 
 
 
-    var pastyear:Int by mutableStateOf(0)
-    var ef:Int by mutableStateOf(0)
-    var maximumt:Double by mutableStateOf(0.0)
-    var minimumt:Double by mutableStateOf(0.0)
+    var pastyear:Int by mutableIntStateOf(0)
+    var ef:Int by mutableIntStateOf(0)
+    var maximumt:Double by mutableDoubleStateOf(0.0)
+    var minimumt:Double by mutableDoubleStateOf(0.0)
     var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Success(""))
         private set
 
@@ -172,7 +186,31 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
      */
     init {
         getMarsPhotos()
+
+//            .onEach { homeUiState.value = it }
     }
+
+//    val homeUiState: StateFlow<HomeUiState> =
+//        marsPhotosRepository.getItemStream(city = plocation,
+//            date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate.time)).map { HomeUiState(it) }
+//            .stateIn(
+//                scope = viewModelScope,
+//                started = SharingStarted.WhileSubscribed(5_000L),
+//                initialValue = HomeUiState()
+//            )
+var homeUiState: StateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
+fun homeui() {
+    homeUiState= marsPhotosRepository.getItemStream(
+        city = plocation,
+        date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate.time)
+    ).map { HomeUiState(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = HomeUiState()
+        )
+}
+     // Update the value of homeUiState
 
 
     /**
@@ -242,6 +280,7 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
 //            }
         }
     }
+
 }
 
 data class ItemUiState(
@@ -292,6 +331,8 @@ fun Item.toItemDetails(): ItemDetails = ItemDetails(
     maxt = maxt.toString(),
     mint = mint.toString()
 )
+
+
 
 //fun CreationExtras.inventoryApplication(): MarsPhotosApplication =
 //    (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MarsPhotosApplication)

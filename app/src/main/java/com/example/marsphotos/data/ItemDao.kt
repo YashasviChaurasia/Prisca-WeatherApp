@@ -15,7 +15,7 @@ interface ItemDao {
     suspend fun insert(item: Item)
 
     @Query("SELECT * FROM item WHERE city =:city AND date =:date")
-    fun getItem(city:String,date:String): Item
+    fun getItem(city:String,date:String):Flow<List<Item>>
 //    @Update
 //    suspend fun update(item: Item)
 //

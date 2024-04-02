@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresExtension
 import com.example.marsphotos.network.MarsApiService
 import com.example.marsphotos.network.MarsPhoto
+import kotlinx.coroutines.flow.Flow
 
 //interface ItemsRepository {
 //    suspend fun insertItem(item: Item)
@@ -21,7 +22,8 @@ interface MarsPhotosRepository {
 
 
 
-    fun getItem(city: String, date: String)
+    fun getItemStream(city: String, date: String): Flow<List<Item>>
+
 }
 
 class NetworkMarsPhotosRepository(
@@ -33,9 +35,8 @@ class NetworkMarsPhotosRepository(
     override suspend fun getMarsPhotos(location: String, startDate: String): MarsPhoto = marsApiService.getPhotos(location, startDate)
     override suspend fun insertItem(item: Item) = itemDao.insert(item)
 
-    override fun getItem(city: String, date: String) {
-        itemDao.getItem(city, date)
-    }
+    override fun getItemStream(city: String, date: String) = itemDao.getItem(city, date)
+
 
 }
 

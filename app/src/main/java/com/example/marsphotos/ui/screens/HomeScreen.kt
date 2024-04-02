@@ -52,6 +52,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -204,15 +205,11 @@ fun ItemEntryBody(viewModel: MarsViewModel,
                     }
                     onSaveClick()
                 }else{
-//                    TODO()
-//    ItemEntryBody(viewModel = viewModel, onSaveClick = {
                     coroutineScope.launch {
                         viewModel.getAverageMarsPhotos()
                     }
-
                     val itemDetails = viewModel.packup2()
                     viewModel.updateUiState(itemDetails)
-//                    onSaveClick()// just later
                 }
                 flag=1
             } ,
@@ -230,9 +227,6 @@ fun ItemEntryBody(viewModel: MarsViewModel,
             }
 //            ResultScreen(vmodel =viewModel, modifier = modifier.fillMaxWidth())
         }
-
-
-
     }
 }
 
@@ -262,7 +256,30 @@ fun ErrorScreen(viewModel: MarsViewModel, modifier: Modifier = Modifier) {
 //        val itemDetails = viewModel.getStuff()
         // Check if itemDetails is not null before accessing its properties
 
-        if(viewModel.ef==4){ Text(text = "City:") }
+        if(viewModel.ef==4){
+            viewModel.homeui()
+            val homeUiState by viewModel.homeUiState.collectAsState()
+
+            val firstItem = homeUiState.itemList.firstOrNull()
+
+            val mintValue: Double
+            val maxValue: Double
+
+            if (firstItem != null) {
+                // If the first item is not null, use its mint and maxt values
+                mintValue = firstItem.mint
+                maxValue = firstItem.maxt
+            } else {
+                // If the first item is null or the list is empty, use default values and display message
+                mintValue = 0.0 // Default value
+                maxValue = 0.0 // Default value
+                Text(text = "Cannot fetch data.")
+            }
+
+            Text(text = "Mint value: $mintValue")
+            Text(text = "Maxt value: $maxValue")
+
+        }
     }
 }
 /**
@@ -284,7 +301,7 @@ fun ResultScreen(vmodel: MarsViewModel, modifier: Modifier = Modifier) {
 
         Column(modifier = Modifier.padding(20.dp)) {
             var eflag by remember {
-                mutableStateOf(0)
+                mutableIntStateOf(0)
             }
             Text(
                 text = "Max Temp: ${if (maxTemp.isNaN()) {
