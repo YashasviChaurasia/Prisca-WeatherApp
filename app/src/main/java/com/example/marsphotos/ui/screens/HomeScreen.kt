@@ -21,12 +21,15 @@ import android.os.Build
 import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -90,154 +93,166 @@ fun ItemEntryBody(viewModel: MarsViewModel,
 ) {
 //    val ivModel : ItemEntryViewModel = viewModel(factory = MarsViewModel.Factory)
 //    val viModel: ItemEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
-    Column(
+    LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val selectedDate = remember { mutableStateOf(Calendar.getInstance()) }
+        item{
 
-        var text by rememberSaveable { mutableStateOf("") }
-        var flag by remember {
-            mutableIntStateOf(0)
-        }
+            val selectedDate = remember { mutableStateOf(Calendar.getInstance()) }
 
-        TextField(
-            value = text,
-            onValueChange = { value ->
-                text = value
-                viewModel.plocation=value // Update the location in the ViewModel
-                flag=0
-            },maxLines = 1,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Done
-            ),
-            label = { Text("Location") },
-            leadingIcon = { Icon(Icons.Filled.LocationOn, contentDescription = "Localized description") },
-        )
+            var text by rememberSaveable { mutableStateOf("") }
+            var flag by remember {
+                mutableIntStateOf(0)
+            }
 
-//        Column(modifier = Modifier.padding(16.dp),horizontalAlignment = Alignment.CenterHorizontally) {
-//            val state = rememberDatePickerState(initialDisplayMode = DisplayMode.Input,)
-//            DatePicker(state = state, modifier = Modifier.padding(16.dp))
-//
-//            DisposableEffect(state.selectedDateMillis) {
-//                onDispose {
-//                    // Ensure selectedDateMillis isn't null to avoid NPE
-//                    if (state.selectedDateMillis != null) {
-//                        // Convert selectedDateMillis to Calendar
-//                        val selectedCalendar = Calendar.getInstance().apply {
-//                            timeInMillis = state.selectedDateMillis!!
-//                        }
-//                        // Update ViewModel's selected date
-//                        viewModel.updateSelectedDate(selectedCalendar)
-//                    }
-//                }
-//            }
-//
-//            // Display selected date in a text field
-//            TextField(
-//                value = selectedDate.value.time.toString(), // Convert date to string
-//                onValueChange = {},
-//                maxLines = 1,
-//                label = { Text("Selected Date") },
-//                leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = "Date Icon") },
-//                readOnly = true // Make the text field read-only
-//            )
-//        }
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val state = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
-            val currentDate = remember { Calendar.getInstance() }
-            val selectedDate = remember { mutableStateOf(currentDate) }
-
-            // Date picker with manual validation
-            DatePicker(
-                state = state,
-                modifier = Modifier.padding(16.dp)
+            TextField(
+                value = text,
+                onValueChange = { value ->
+                    text = value
+                    viewModel.plocation = value // Update the location in the ViewModel
+                    flag = 0
+                },
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                ),
+                label = { Text("Location") },
+                leadingIcon = {
+                    Icon(
+                        Icons.Filled.LocationOn,
+                        contentDescription = "Localized description"
+                    )
+                },
             )
 
-            DisposableEffect(state.selectedDateMillis) {
-                onDispose {
-                    // Ensure selectedDateMillis isn't null to avoid NPE
-                    if (state.selectedDateMillis != null) {
-                        // Convert selectedDateMillis to Calendar
-                        val selectedCalendar = Calendar.getInstance().apply {
-                            timeInMillis = state.selectedDateMillis!!
-                        }
-                        // If future date is selected, store the current date instead
-                        if (selectedCalendar > currentDate) {
-                            selectedDate.value = selectedCalendar
-                            viewModel.updateSelectedDate(selectedCalendar)
-                            viewModel.pastyear=1
-//                            selectedDate.value = currentDate.clone() as Calendar
-//                            viewModel.updateSelectedDate(currentDate)
-                        } else {
-                            viewModel.pastyear=0
-                            selectedDate.value = selectedCalendar
-                            viewModel.updateSelectedDate(selectedCalendar)
+            //        Column(modifier = Modifier.padding(16.dp),horizontalAlignment = Alignment.CenterHorizontally) {
+            //            val state = rememberDatePickerState(initialDisplayMode = DisplayMode.Input,)
+            //            DatePicker(state = state, modifier = Modifier.padding(16.dp))
+            //
+            //            DisposableEffect(state.selectedDateMillis) {
+            //                onDispose {
+            //                    // Ensure selectedDateMillis isn't null to avoid NPE
+            //                    if (state.selectedDateMillis != null) {
+            //                        // Convert selectedDateMillis to Calendar
+            //                        val selectedCalendar = Calendar.getInstance().apply {
+            //                            timeInMillis = state.selectedDateMillis!!
+            //                        }
+            //                        // Update ViewModel's selected date
+            //                        viewModel.updateSelectedDate(selectedCalendar)
+            //                    }
+            //                }
+            //            }
+            //
+            //            // Display selected date in a text field
+            //            TextField(
+            //                value = selectedDate.value.time.toString(), // Convert date to string
+            //                onValueChange = {},
+            //                maxLines = 1,
+            //                label = { Text("Selected Date") },
+            //                leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = "Date Icon") },
+            //                readOnly = true // Make the text field read-only
+            //            )
+            //        }
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                val state = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
+                val currentDate = remember { Calendar.getInstance() }
+                val selectedDate = remember { mutableStateOf(currentDate) }
+
+                // Date picker with manual validation
+                DatePicker(
+                    state = state,
+                    modifier = Modifier.padding(16.dp)
+                )
+
+                DisposableEffect(state.selectedDateMillis) {
+                    onDispose {
+                        // Ensure selectedDateMillis isn't null to avoid NPE
+                        if (state.selectedDateMillis != null) {
+                            // Convert selectedDateMillis to Calendar
+                            val selectedCalendar = Calendar.getInstance().apply {
+                                timeInMillis = state.selectedDateMillis!!
+                            }
+                            // If future date is selected, store the current date instead
+                            if (selectedCalendar > currentDate) {
+                                selectedDate.value = selectedCalendar
+                                viewModel.updateSelectedDate(selectedCalendar)
+                                viewModel.pastyear = 1
+                                //                            selectedDate.value = currentDate.clone() as Calendar
+                                //                            viewModel.updateSelectedDate(currentDate)
+                            } else {
+                                viewModel.pastyear = 0
+                                selectedDate.value = selectedCalendar
+                                viewModel.updateSelectedDate(selectedCalendar)
+                            }
                         }
                     }
                 }
-            }
 
-            // Display selected date in a text field
-            TextField(
-                value = selectedDate.value.time.toString(), // Convert date to string
-                onValueChange = {},
-                maxLines = 1,
-                label = { Text("Selected Date") },
-                leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = "Date Icon") },
-                readOnly = true // Make the text field read-only
-            )
-//            Text(text = "Selected Date: ${selectedDate.value.time}")
-        }
-        val coroutineScope = rememberCoroutineScope()
-        Button(
-            onClick = {
-                if(viewModel.pastyear==0){
-                    viewModel.getMarsPhotos()
-                    val itemDetails = viewModel.packup()
-                    if (itemDetails != null) {
-                        // Call saveItem with the prepared itemDetails
+                // Display selected date in a text field
+                TextField(
+                    value = selectedDate.value.time.toString(), // Convert date to string
+                    onValueChange = {},
+                    maxLines = 1,
+                    label = { Text("Selected Date") },
+                    leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = "Date Icon") },
+                    readOnly = true // Make the text field read-only
+                )
+                //            Text(text = "Selected Date: ${selectedDate.value.time}")
+            }
+            val coroutineScope = rememberCoroutineScope()
+            Button(
+                onClick = {
+                    if (viewModel.pastyear == 0) {
+                        viewModel.getMarsPhotos()
+                        val itemDetails = viewModel.packup()
+                        if (itemDetails != null) {
+                            // Call saveItem with the prepared itemDetails
+                            viewModel.updateUiState(itemDetails)
+                        }
+                        onSaveClick()
+                    } else {
+                        coroutineScope.launch {
+                            viewModel.getAverageMarsPhotos()
+                        }
+                        val itemDetails = viewModel.packup2()
                         viewModel.updateUiState(itemDetails)
                     }
-                    onSaveClick()
-                }else{
-                    coroutineScope.launch {
-                        viewModel.getAverageMarsPhotos()
-                    }
-                    val itemDetails = viewModel.packup2()
-                    viewModel.updateUiState(itemDetails)
-                }
-                flag=1
-            } ,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) {
-            Text("Get Mars Photos")
-        }
-        Text(text = "Past   : ${viewModel.pastyear}")
-        if(flag==1){
-            when(viewModel.marsUiState) {
-                MarsUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxWidth())
-                MarsUiState.Error -> ErrorScreen(viewModel,modifier = modifier.fillMaxWidth())
-                is MarsUiState.Success -> ResultScreen(vmodel =viewModel, modifier = modifier.fillMaxWidth())
-                else -> {}
+                    viewModel.ef = 0
+                    flag = 1
+                },
+                modifier = Modifier,
+            ) {
+                Text("Get Mars Photos")
             }
-//            ResultScreen(vmodel =viewModel, modifier = modifier.fillMaxWidth())
+            Text(text = "Past   : ${viewModel.pastyear}")
+            if (flag == 1) {
+                when (viewModel.marsUiState) {
+                    MarsUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxWidth())
+                    MarsUiState.Error -> ErrorScreen(viewModel, modifier = modifier.fillMaxWidth())
+                    is MarsUiState.Success -> ResultScreen(
+                        vmodel = viewModel,
+                        modifier = modifier.fillMaxWidth()
+                    )
+
+                    else -> {}
+                }
+                //            ResultScreen(vmodel =viewModel, modifier = modifier.fillMaxWidth())
+            }
         }
-    }
+}
 }
 
 
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
-    Image(
-        modifier = modifier.size(200.dp),
-        painter = painterResource(R.drawable.loading_img),
-        contentDescription = stringResource(R.string.loading)
-    )
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally){ Text("Loading...",modifier = Modifier.padding(16.dp)
+        .wrapContentSize(Alignment.Center)) }
 }
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
@@ -248,38 +263,97 @@ fun ErrorScreen(viewModel: MarsViewModel, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_broken_image), contentDescription = ""
-        )
-        Text(text = stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
-        Text(text = viewModel.ef.toString(), modifier = Modifier.padding(16.dp))
+        if (viewModel.ef == 4) {
+            ConnectionErrorScreen(viewModel)
+        } else {
+            BadRequestScreen()
+        }
 //        val itemDetails = viewModel.getStuff()
         // Check if itemDetails is not null before accessing its properties
 
-        if(viewModel.ef==4){
-            viewModel.homeui()
-            val homeUiState by viewModel.homeUiState.collectAsState()
+//        if(viewModel.ef==4){
+//            Image(
+//                modifier = modifier.size(100.dp).padding(16.dp), painter = painterResource(id = R.drawable.ic_connection_error), contentDescription = ""
+//            )
+//            viewModel.homeui()
+//            val homeUiState by viewModel.homeUiState.collectAsState()
+//
+//            val firstItem = homeUiState.itemList.firstOrNull()
+//
+//            val mintValue: Double
+//            val maxValue: Double
+//            if (firstItem != null) {
+//                // If the first item is not null, use its mint and maxt values
+//                mintValue = firstItem.mint
+//                maxValue = firstItem.maxt
+//                Text(text = "Data from Local Database")
+//                Text(text = "Maximum Temperature: $maxValue °C",style = TextStyle(fontSize = 20.sp))
+//                Text(text = "Minimum Temperature: $mintValue °C",style = TextStyle(fontSize = 20.sp))
+//            } else {
+//                Text(text = "Cannot fetch data from Local Database")
+//            }
+//            Text(text = "No Network Connection!")
+//
+//
+//        }
+//        else{
+//            Image(
+//                modifier = modifier.size(100.dp).padding(16.dp),painter = painterResource(id = R.drawable.ic_broken_image), contentDescription = ""
+//            )
+//            Text(text = "Bad Request", modifier = Modifier.padding(16.dp))
+////            Text(text = viewModel.ef.toString(), modifier = Modifier.padding(16.dp))
+//        }
+    }
+}
 
-            val firstItem = homeUiState.itemList.firstOrNull()
 
-            val mintValue: Double
-            val maxValue: Double
-
-            if (firstItem != null) {
-                // If the first item is not null, use its mint and maxt values
-                mintValue = firstItem.mint
-                maxValue = firstItem.maxt
-            } else {
-                // If the first item is null or the list is empty, use default values and display message
-                mintValue = 0.0 // Default value
-                maxValue = 0.0 // Default value
-                Text(text = "Cannot fetch data.")
-            }
-
-            Text(text = "Mint value: $mintValue")
-            Text(text = "Maxt value: $maxValue")
-
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+@Composable
+fun ConnectionErrorScreen(viewModel: MarsViewModel) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            modifier = Modifier
+                .size(100.dp)
+                .padding(16.dp),
+            painter = painterResource(id = R.drawable.ic_connection_error),
+            contentDescription = ""
+        )
+//        viewModel.homeui()
+        val homeUiState by viewModel.homeUiState.collectAsState()
+        val firstItem = homeUiState.itemList.firstOrNull()
+        if (firstItem != null) {
+            // If the first item is not null, use its mint and maxt values
+            val mintValue = firstItem.mint
+            val maxValue = firstItem.maxt
+            Text(text = "Data from Local Database")
+            Text(text = "Maximum Temperature: $maxValue °C", style = TextStyle(fontSize = 20.sp))
+            Text(text = "Minimum Temperature: $mintValue °C", style = TextStyle(fontSize = 20.sp))
+        } else {
+            Text(text = "Cannot fetch data from Local Database")
         }
+        Text(text = "No Network Connection!")
+    }
+}
+
+@Composable
+fun BadRequestScreen() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            modifier = Modifier
+                .size(100.dp)
+                .padding(16.dp),
+            painter = painterResource(id = R.drawable.ic_broken_image),
+            contentDescription = ""
+        )
+        Text(text = "Bad Request", modifier = Modifier.padding(16.dp))
     }
 }
 /**

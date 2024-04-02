@@ -48,6 +48,8 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+
+
 sealed interface MarsUiState {
     data class Success(val photos: String) : MarsUiState
     object Error : MarsUiState
@@ -78,6 +80,9 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
     }
     suspend fun getAverageMarsPhotos() {
         // Get the current year
+        if(ef==4){
+            return
+        }
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
         // Store the initial selected date
@@ -89,6 +94,9 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
 
         // Iterate over the past 10 years, keeping day and month the same
         for (i in 1..10) {
+            if(ef==4){
+                return
+            }
             // Update the selected date to the initial date with year changed
             selectedDate = initialDate.clone() as Calendar
             selectedDate.set(Calendar.YEAR, currentYear - i)
@@ -113,9 +121,13 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
         // Update mutable state variables
         minimumt = averageMinT
         maximumt = averageMaxT
-        delay(5000)
-        saveItem()
+        delay(50)
+//        delay(5000)
+//        if (ef==0) {
+//            saveItem()
+//        }
     }
+
 
 
     fun packup2(): ItemDetails {
@@ -153,6 +165,7 @@ class MarsViewModel(private val marsPhotosRepository: MarsPhotosRepository) : Vi
 
         }
     }
+
 
 
 
@@ -250,6 +263,7 @@ fun homeui() {
             }
             catch (e: IOException) {
                 ef=4//Internet connection,
+                homeui()
                 MarsUiState.Error
             } catch (e: HttpException) {
                 ef=1
